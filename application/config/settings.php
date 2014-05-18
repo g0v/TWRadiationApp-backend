@@ -29,5 +29,6 @@ $config = array
 	'title_delimiter' => ' | ',
 	'alert_days' => 0, // HT: No of days of alert to be sent
 	'timeline_graph' => 'line', // HT: Timeline graph type
+	'nuclear' => 14, // HT: Timeline graph type
 	'timeline_point_label' => false // HT: Timeline graph point label
 );

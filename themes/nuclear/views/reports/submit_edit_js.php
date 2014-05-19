@@ -443,7 +443,8 @@
 			  persist: "location",
 			  collapsed: true,
 			  unique: false
-			});
+			}).find('.expandable-hitarea').click();
+			$('div .collapsable-hitarea').parent().children('label').children('input').remove();
 			
 			// Date Picker JS
 			$("#incident_date").datepicker({ 

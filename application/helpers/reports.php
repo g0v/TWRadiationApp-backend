@@ -37,7 +37,6 @@ class reports_Core {
 	 */
 	public static function validate(array & $post)
 	{
-
 		// Exception handling
 		if ( ! isset($post) OR ! is_array($post))
 			return FALSE;
@@ -72,7 +71,19 @@ class reports_Core {
 		}
 		else
 		{
-			$post->add_rules('incident_category.*','required','numeric');
+			$category_error = FALSE;
+			for ($canum = 1; $canum <= Kohana::config('settings.nu_category_parent_num'); $canum += 1) {
+				if ( ! isset($post->incident_category[''.$canum])) {
+					error_log($canum . " not found!");
+					$category_error = TRUE;
+					break;
+				}
+			}
+			if ($category_error) {
+				$post->add_error('incident_category','required');
+			} else {
+				$post->add_rules('incident_category.*','required','numeric');
+			}
 		}
 
 		// Validate only the fields that are filled in

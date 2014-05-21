@@ -117,7 +117,7 @@
 							: array();
 							
 						
-						echo nucategory::form_radio('incident_category', $selected_categories, 2);
+						echo category::form_radio('incident_category', $selected_categories, 2);
 						?>
 					</div>
 				</div>

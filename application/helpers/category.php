@@ -24,7 +24,7 @@ class category_Core {
 		$disabled = "";
 		if (!$enable_parents AND count($category['children']) > 0)
 		{
-			$disabled = " disabled=\"disabled\"";	
+			$disabled = " disabled=\"disabled\"";
 		}
 
 		$html .= "<label>";
@@ -32,6 +32,26 @@ class category_Core {
 		$html .= $category['category_title'];
 		$html .= "</label>";
 
+		return $html;
+	}
+
+	private static function display_category_radio($category, $selected_categories, $form_field, $enable_parents = FALSE, $index)
+	{
+		$html = '';
+		$cid = $category['category_id'];
+
+		// Category is selected.
+		$category_checked = in_array($cid, $selected_categories);
+		$disabled = "";
+		if (!$enable_parents AND count($category['children']) > 0)
+		{
+			$disabled = " disabled=\"disabled\"";
+		}
+
+		$html .= "<label>";
+		$html .= form::radio($form_field.'['.$index.']', $cid, $category_checked, ' class="check-box"'.$disabled);
+		$html .= $category['category_title'];
+		$html .= "</label>";
 		return $html;
 	}
 
@@ -119,7 +139,67 @@ class category_Core {
 
 		return $html;
 	}
+
+	public static function form_radio($form_field, array $selected_categories = array(), $columns = 1, $enable_parents = FALSE, $show_hidden = FALSE)
+	{
+		$category_data = self::get_category_tree_data(FALSE, $show_hidden);
+		$html = '';
+
+		// Validate columns
+		$columns = (int) $columns;
+		if ($columns == 0)
+		{
+			$columns = 1;
+		}
+
+		$categories_total = count($category_data);
 	
+		// Format categories for column display.
+		// Column number
+		$this_col = 1;
+
+		// Maximum number of elements per column
+		$maxper_col = round($categories_total / $columns);
+
+		// start the first column
+		$html .= "\n".'<ul class="category-column category-column-'.$this_col.'" id="category-column-'.$this_col.'">'."\n";
+
+		$i = 1;  // Element Count
+		foreach ($category_data as $category)
+		{
+			// Display parent category.
+			$html .= "\n\t".'<li title="'.$category['category_description'].'">';
+			$html .= "\n\t\t".category::display_category_radio($category, $selected_categories, $form_field, $enable_parents, $i)."\n";
+
+			// Display child categories.
+			if (count($category['children']) > 0)
+			{
+				$html .= "\t\t<ul>";
+				foreach ($category['children'] as $child)
+				{
+					$html .= "\n\t\t\t".'<li title="'.$child['category_description'].'">'."\n";
+					$html .= category::display_category_radio($child, $selected_categories, $form_field, $enable_parents, $i);
+					$html .= "\n\t\t\t".'</li>'."\r\n";
+				}
+				$html .= "\t\t".'</ul>'."\r\n";
+			}
+			$html .= "\t</li>\n";
+
+			// If this is the last element of a column, close the UL
+			if ( (($i % $maxper_col) == 0 AND $i > 0) OR $i == $categories_total)
+			{
+				$html .= "</ul>\n";
+				$this_col++;
+				if($i < $categories_total)
+				{
+					$html .= '<ul class="category-column category-column-'.$this_col.'" id="category-column-'.$this_col.'">';
+				}
+			}
+			$i++;
+		}
+		return $html;
+	}
+
 	/**
 	 * Generates a category tree view - recursively iterates
 	 *

@@ -268,7 +268,7 @@ class actioner {
 
 		// Get out of here as fast as possible if there are no actions.
 		if($actions->count() <= 0) return false;
-
+// 		debug::log_trace();
 		foreach ($actions as $action)
 		{
 			// Collect variables for this action
@@ -700,10 +700,18 @@ class actioner {
 			$verify = (int)$vars['verify'];
 		}
 
-		foreach($categories as $category_id)
-		{
-			// Assign Category
-			Incident_Category_Model::assign_category_to_incident($incident_id,$category_id);
+		if ( Kohana::config('settings.nu_add_category_by_role') ) {
+			if (Auth::instance()->has_permission('reports_download')) {
+				Incident_Category_Model::assign_category_to_incident($incident_id, Kohana::config('settings.nu_add_category_trust_category'));
+			} else {
+				Incident_Category_Model::assign_category_to_incident($incident_id, Kohana::config('settings.nu_add_category_normal_category'));
+			}
+		} else {
+			foreach($categories as $category_id)
+			{
+				// Assign Category
+				Incident_Category_Model::assign_category_to_incident($incident_id,$category_id);
+			}
 		}
 
 		// Approve Report

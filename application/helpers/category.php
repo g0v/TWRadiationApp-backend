@@ -167,6 +167,9 @@ class category_Core {
 		$i = 1;  // Element Count
 		foreach ($category_data as $category)
 		{
+			if ($category['category_id'] == Kohana::config('settings.nu_add_category_parent_category')) {
+				continue;
+			}
 			// Display parent category.
 			$html .= "\n\t".'<li title="'.$category['category_description'].'">';
 			$html .= "\n\t\t".category::display_category_radio($category, $selected_categories, $form_field, $enable_parents, $i)."\n";

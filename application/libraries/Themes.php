@@ -111,7 +111,8 @@ class Themes_Core {
 
 		if ($this->map_enabled)
 		{
-			Requirements::js("media/js/OpenLayers.js");
+			//Requirements::js("media/js/OpenLayers.js");
+			Requirements::js("media/js/OpenLayers.debug.js");
 			Requirements::js("media/js/ushahidi.js");
 			if ($this->api_url)
 			{

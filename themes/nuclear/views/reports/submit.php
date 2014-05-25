@@ -45,13 +45,15 @@
 						</h4>
 					</div>
 					<?php endif; ?>
-					<h4><?php echo Kohana::lang('ui_main.reports_title'); ?> <span class="required">*</span> </h4>
+					<!-- <h4><?php /*echo Kohana::lang('ui_main.reports_title');*/ ?> <span class="required">*</span> </h4> -->
+					<h4>量測值<span class="required">*</span> </h4>
 					<?php print form::input('incident_title', $form['incident_title'], ' class="text long"'); ?>
 				</div>
 				<div class="report_row">
-					<h4><?php echo Kohana::lang('ui_main.reports_description'); ?> <span class="required">*</span> </h4>
-					<span class="allowed-html"><?php echo html::allowed_html(); ?></span>
-					<?php print form::textarea('incident_description', $form['incident_description'], ' rows="10" class="textarea long" ') ?>
+					<!-- <h4><?php /*echo Kohana::lang('ui_main.reports_description');*/ ?> <span class="required">*</span> </h4> -->
+					<h4>備註</h4>
+					<!-- <span class="allowed-html"><?php /*echo html::allowed_html();*/ ?></span> -->
+					<?php print form::textarea('incident_description', $form['incident_description'], ' rows="2" class="textarea long" ') ?>
 				</div>
 				<div class="report_row" id="datetime_default">
 					<h4>

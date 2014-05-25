@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- 主機: localhost
--- 產生日期: 2014 年 05 月 18 日 00:37
+-- 產生日期: 2014 年 05 月 21 日 21:31
 -- 伺服器版本: 5.5.34-0ubuntu0.13.04.1
 -- PHP 版本: 5.4.9-4ubuntu2.4
 
@@ -36,7 +36,14 @@ CREATE TABLE IF NOT EXISTS `actions` (
   `response_vars` text NOT NULL,
   `active` tinyint(4) NOT NULL,
   PRIMARY KEY (`action_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Stores user defined actions triggered by certain events' AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores user defined actions triggered by certain events' AUTO_INCREMENT=2 ;
+
+--
+-- 轉存資料表中的資料 `actions`
+--
+
+INSERT INTO `actions` (`action_id`, `action`, `qualifiers`, `response`, `response_vars`, `active`) VALUES
+(1, 'report_add', 'a:7:{s:4:"user";s:1:"0";s:8:"location";s:8:"specific";s:8:"geometry";a:1:{i:0;s:249:"{"geometry":"POLYGON((121.03741929687952 25.87203298539387,118.55450914062702 23.29479492177476,120.88361070312496 20.892643130624467,122.68536851563051 24.199832641251724,122.53155992187598 25.77313988610665,121.03741929687952 25.87203298539387))"}";}s:7:"keyword";s:0:"";s:17:"on_specific_count";s:0:"";s:28:"on_specific_count_collective";s:1:"0";s:13:"between_times";i:0;}', 'approve_report', 'a:1:{s:6:"verify";s:1:"0";}', 1);
 
 -- --------------------------------------------------------
 
@@ -207,7 +214,7 @@ INSERT INTO `category` (`id`, `parent_id`, `locale`, `category_position`, `categ
 (1, 0, 'en_US', 0, '高度分類', 'Category 1', '9900CC', NULL, NULL, 1, 0),
 (2, 0, 'en_US', 3, '區域分類', 'Category 2', '3300FF', NULL, NULL, 1, 0),
 (3, 0, 'en_US', 6, '儀器分類', 'Category 3', '663300', NULL, NULL, 1, 0),
-(4, 0, 'en_US', 11, 'Trusted Reports', 'Reports from trusted reporters', '339900', NULL, NULL, 1, 1),
+(4, 0, 'en_US', 14, 'Trusted Reports', 'Reports from trusted reporters', '339900', NULL, NULL, 0, 1),
 (6, 1, 'zh_TW', 1, '地板上', '地板上', '00e1ff', NULL, NULL, 1, 0),
 (7, 1, 'zh_TW', 2, '一公尺', '一公尺', '00ff33', NULL, NULL, 1, 0),
 (8, 2, 'zh_TW', 4, '於室內', '於室內', 'fff582', NULL, NULL, 1, 0),
@@ -216,9 +223,9 @@ INSERT INTO `category` (`id`, `parent_id`, `locale`, `category_position`, `categ
 (11, 3, 'zh_TW', 8, '儀器B', '儀器B', '0022ff', NULL, NULL, 1, 0),
 (12, 3, 'zh_TW', 9, '儀器C', '儀器C', '632963', NULL, NULL, 1, 0),
 (13, 3, 'zh_TW', 10, '儀器D', '儀器D', '008051', NULL, NULL, 1, 0),
-(14, 0, 'zh_TW', 12, '人員分類', '人員分類', '79ff5e', NULL, NULL, 1, 0),
-(15, 14, 'zh_TW', 13, '專業人士', '專業人士', '003e54', NULL, NULL, 1, 0),
-(16, 14, 'zh_TW', 14, '一般人士', '一般人士', 'ffd500', NULL, NULL, 1, 0);
+(14, 0, 'zh_TW', 11, '人員分類', '人員分類', '79ff5e', NULL, NULL, 1, 0),
+(15, 14, 'zh_TW', 12, '專業人士', '專業人士', '003e54', NULL, NULL, 1, 0),
+(16, 14, 'zh_TW', 13, '一般人士', '一般人士', 'ffd500', NULL, NULL, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -798,14 +805,7 @@ CREATE TABLE IF NOT EXISTS `incident` (
   KEY `user_id` (`user_id`),
   KEY `incident_mode` (`incident_mode`),
   KEY `incident_verified` (`incident_verified`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores reports submitted' AUTO_INCREMENT=2 ;
-
---
--- 轉存資料表中的資料 `incident`
---
-
-INSERT INTO `incident` (`id`, `location_id`, `form_id`, `locale`, `user_id`, `incident_title`, `incident_description`, `incident_date`, `incident_mode`, `incident_active`, `incident_verified`, `incident_dateadd`, `incident_dateadd_gmt`, `incident_datemodify`, `incident_alert_status`, `incident_zoom`) VALUES
-(1, 1, 1, 'en_US', 1, 'Hello Ushahidi!', 'Welcome to Ushahidi. Please replace this report with a valid incident', '2012-04-04 12:54:31', 1, 1, 1, NULL, NULL, NULL, 0, NULL);
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Stores reports submitted' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -821,14 +821,7 @@ CREATE TABLE IF NOT EXISTS `incident_category` (
   UNIQUE KEY `incident_category_ids` (`incident_id`,`category_id`),
   KEY `incident_id` (`incident_id`),
   KEY `category_id` (`category_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores submitted reports categories' AUTO_INCREMENT=2 ;
-
---
--- 轉存資料表中的資料 `incident_category`
---
-
-INSERT INTO `incident_category` (`id`, `incident_id`, `category_id`) VALUES
-(1, 1, 1);
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Stores submitted reports categories' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -924,14 +917,7 @@ CREATE TABLE IF NOT EXISTS `location` (
   KEY `country_id` (`country_id`),
   KEY `latitude` (`latitude`),
   KEY `longitude` (`longitude`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores location information' AUTO_INCREMENT=2 ;
-
---
--- 轉存資料表中的資料 `location`
---
-
-INSERT INTO `location` (`id`, `location_name`, `country_id`, `latitude`, `longitude`, `location_visible`, `location_date`) VALUES
-(1, 'Nairobi', 115, -1.28730007070501, 36.8214511820082, 1, '2009-06-30 00:00:00');
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Stores location information' AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1264,7 +1250,9 @@ CREATE TABLE IF NOT EXISTS `roles_users` (
 INSERT INTO `roles_users` (`user_id`, `role_id`) VALUES
 (1, 1),
 (1, 2),
-(1, 3);
+(1, 3),
+(2, 1),
+(2, 5);
 
 -- --------------------------------------------------------
 
@@ -1290,11 +1278,11 @@ CREATE TABLE IF NOT EXISTS `scheduler` (
 --
 
 INSERT INTO `scheduler` (`id`, `scheduler_name`, `scheduler_last`, `scheduler_weekday`, `scheduler_day`, `scheduler_hour`, `scheduler_minute`, `scheduler_controller`, `scheduler_active`) VALUES
-(1, 'Feeds', 1400342821, -1, -1, -1, 0, 's_feeds', 1),
-(2, 'Alerts', 1400343974, -1, -1, -1, -1, 's_alerts', 1),
-(3, 'Email', 1400342821, -1, -1, -1, 0, 's_email', 1),
-(4, 'Twitter', 1400342821, -1, -1, -1, 0, 's_twitter', 1),
-(5, 'Cleanup', 1400342822, -1, -1, -1, 0, 's_cleanup', 1);
+(1, 'Feeds', 1400677582, -1, -1, -1, 0, 's_feeds', 1),
+(2, 'Alerts', 1400679036, -1, -1, -1, -1, 's_alerts', 1),
+(3, 'Email', 1400677582, -1, -1, -1, 0, 's_email', 1),
+(4, 'Twitter', 1400677582, -1, -1, -1, 0, 's_twitter', 1),
+(5, 'Cleanup', 1400677582, -1, -1, -1, 0, 's_cleanup', 1);
 
 -- --------------------------------------------------------
 
@@ -1309,68 +1297,14 @@ CREATE TABLE IF NOT EXISTS `scheduler_log` (
   `scheduler_date` int(10) unsigned NOT NULL,
   PRIMARY KEY (`id`),
   KEY `scheduler_id` (`scheduler_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores a log of scheduler actions' AUTO_INCREMENT=56 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores a log of scheduler actions' AUTO_INCREMENT=2 ;
 
 --
 -- 轉存資料表中的資料 `scheduler_log`
 --
 
 INSERT INTO `scheduler_log` (`id`, `scheduler_id`, `scheduler_status`, `scheduler_date`) VALUES
-(1, 1, '200', 1400231789),
-(2, 2, '200', 1400231789),
-(3, 3, '200', 1400231789),
-(4, 4, '200', 1400231789),
-(5, 5, '200', 1400231789),
-(6, 2, '200', 1400231821),
-(7, 2, '200', 1400232600),
-(8, 2, '200', 1400232605),
-(9, 1, '200', 1400243240),
-(10, 2, '200', 1400243240),
-(11, 3, '200', 1400243240),
-(12, 4, '200', 1400243240),
-(13, 5, '200', 1400243240),
-(14, 2, '200', 1400244783),
-(15, 2, '200', 1400244921),
-(16, 2, '200', 1400244961),
-(17, 2, '200', 1400245038),
-(18, 1, '200', 1400308583),
-(19, 2, '200', 1400308583),
-(20, 3, '200', 1400308583),
-(21, 4, '200', 1400308583),
-(22, 5, '200', 1400308583),
-(23, 2, '200', 1400308857),
-(24, 2, '200', 1400308863),
-(25, 1, '200', 1400325231),
-(26, 2, '200', 1400325231),
-(27, 3, '200', 1400325231),
-(28, 4, '200', 1400325231),
-(29, 5, '200', 1400325231),
-(30, 1, '200', 1400339841),
-(31, 2, '200', 1400339841),
-(32, 3, '200', 1400339842),
-(33, 4, '200', 1400339842),
-(34, 5, '200', 1400339842),
-(35, 2, '200', 1400339901),
-(36, 2, '200', 1400339975),
-(37, 2, '200', 1400340005),
-(38, 2, '200', 1400340060),
-(39, 2, '200', 1400340086),
-(40, 2, '200', 1400340139),
-(41, 2, '200', 1400340182),
-(42, 2, '200', 1400340251),
-(43, 2, '200', 1400340306),
-(44, 2, '200', 1400340376),
-(45, 2, '200', 1400340473),
-(46, 2, '200', 1400340501),
-(47, 2, '200', 1400340548),
-(48, 2, '200', 1400340655),
-(49, 2, '200', 1400340680),
-(50, 1, '200', 1400342821),
-(51, 2, '200', 1400342821),
-(52, 3, '200', 1400342821),
-(53, 4, '200', 1400342821),
-(54, 5, '200', 1400342822),
-(55, 2, '200', 1400343974);
+(1, 2, '200', 1400679036);
 
 -- --------------------------------------------------------
 
@@ -1414,8 +1348,8 @@ CREATE TABLE IF NOT EXISTS `sessions` (
 --
 
 INSERT INTO `sessions` (`session_id`, `last_activity`, `data`) VALUES
-('o4jqts4aheqibsnfuamsqdjme1', 1400340011, 'f51bRWD9qWI4kYxKa2XyijSsdtbql3o0JB7ztgq9ceP6lVEtyee52jDoMZ9u4DCThc+dUhb2gAgIr3RBkzz50Bjz7sF6Qif5a8rIBJLPslTww4lbw10v1l0ZEHqryc6KN1Gorichnqf2hjSNColE/Bl1j+0GQY5QGzrIGaPv2uCidHK7nJdUhYuBXeqKDr1SltSq0gnIqdW6yY/O6EmFNI6+kGCZ2ke3OCkPbd9Hynui0pPxa2qZ03b8ROgbtoSvkd6Z1Ns2kRYVnDMPQGsuf1eG/67kDcti/hL0t6mM6VIoZCmOB+w/ls50GQqboKnHRM0+S/tyuhCcwyZhBe8GIMD9G7SvfEGpIamMPr4m48MO+eDHJ9SH12AQk19/qrCV7kVHj8tAquIPwPeJcxxcF4ILrm/fWvSoQogXHhuTy6Swz/sM0YXKO18djWtpuF6+aHM6lAZAG/fK6VNBcvdpJb0Ps1AKZqYy3K6jPW5AzBnLdb8xuHiKTeaLAimYAzvR5Oxdy3pnC6U9Jm+YnuC9/dBMUQ=='),
-('132btk2qphcpeqeh5hajnh31m6', 1400344014, 'YGa2FCT4fM6HHiZalkBrQnluEQDHInPsGXcTB7wwH/Z2RtMPDXdtZl53nvMY9O5J9EUOFAS4MIc/M70pmB2UNgoVd714ZjvR6/q7txhghCDlh91gSFVPlTy20v0VLiSJLazXhY4wnS+YZuMrtXTq5piYII7ALc92OnDD24vMHZY/jP2IfSfX99u+QRjcjaTU9Y3luCUYq/9dL6ndJdQz5zLxER4aY/aCdn3qy4xITLtpQFttGdzdbsHBCgKK8RxWRAxgzcuS+kPFaJeOcQAbE/9qcrjoaYEvkw0RN+LY9TFE4GnHYXJpp+ZQhz+oilIdg9CwN5t1LqWAWKdXYW+Q9F7MvwB7JqtJSdThWMNeaClCU47kemMdT3H81ti84Zx3iOnidC1czOxr1a2FqNVZhewLjpL85Z/Zv0SWLbLqMGieMND5dUOr0pEywZDGFqV2YE1IDv68wp7Uue9NyjklzIsZ7/zo8/G6oAYz6L9vyPWAtfl72zovj08V/Odo/JvcPsImyo1Rb4djTcJ+DHq2RPaIA33CVGQ0q2+KP+GJzxWDYOoYLsN0VYQjGqwDLn+qNhKmpb8JoBNOqepxY4Q8xJRpt3ky1AFWFAMMBZNOCl4IcwvLaDn3Ic94NBZZvt7uca81E12cKjO1/tvNSASIPCni4AlV1KgjGuyEDnst3ecr52fpVv6PPlQ8e19V9H38DQ6hd/vQxjiyggsFWbWFbkyZxdpgSc0E9fgDDqZFVNtBvtUdk8OckOSGGvJbHKz4iPsOfNjKxZHC2uS//qegk0y+KYVke2uyF+4FfYRaDcGQa/fbImQ5wTL7YmH1jOpleD3CHfYeH/FKdbGEMtW+AM0DyHeooHDfnzRuCUeN0fN2APAU/RHd+ytfg/NDxc9ub/fYE8nev7/dPiSPn+tycvrwBlbzBh7/Dcx9eLX2l8xnNG9KAUMDADOIIPqYb8e6u8EQROq43nP9BrUNJKFFSlXzajbv96LSlmGMB2Py0M5JeXnlcrTnYVrgXz58VTbKqcTYAFq4jObmXNf7WdHv1TzVOQEXbgHpE6GOMSJfCLTkLlfvC3bcKarLuTbIDauDVfEvlgCc4RWRqQmazDzchJbcDswknixupXqcNh4hxCF6HmMOB0no3o0TJZY+4lXPCNzEyY47ptjkDIx39UMn+di/DVFerN2u/Hm5a+qGdtOKbv75zS0SvllHOWD2IcRNC6NyzZoi8AXj9MDpIPY6SIlHATxat7lWZ2v1u5YPhwhD6jitnybEh0zyhdFe3yuspkruCWtX1XYZPyyonMGI61PS823P95aQMpTOvoJsrKe57vzW6OMuAYIThF4h2YrXxdqa2+IgG4dLAsKXZG/eDZvjdhx1jDlP/qn6sOlXxDdyzhueavV/ign6rEBR0iIJyhh0U19qvM/E6HcrKRZBbMSMWh1wi8zE97EZplUC5YovWtSfgUp3HmpW1l4LZNhioJ91DheDhGtnRXX4QICMhrBopXBA');
+('0nhscldhfrrpkmotvut9ci6bl0', 1400678352, 'saeQvmufsedLfcSKDwdux/jjs5+qb2qGPs9ZOXy6MAGC59DTpRd7x6OPLKULDL8QDefAOGW768YWti3M+B7q+fi4aoK3JiqJTqCCB+DMRMm05g6CWqtv6nG7OfIbNADo0QsZI56OrEjGC5+yJGO6eVpQ+aTAc2ppZEIKiTC+jGLddD/7ri7n1qzayi783Eia3fJzs6VPsL1+AnOYaxQ/4ewfbw86yqJxp5HFJtaOEORiLmRGmR36YcW7OuAmPiDDqTCWeI8Io838TdxCJS7JQCZGeU6qX8dKOaGs60mgwU11aCxgjOk+L90YzCq5pGngO/fMlMh/qpZ1YoHv7Yqq9DhWAuQZqk7Y+hHQelkTBZ0efCZsueQM0s43iTs5iS5PwYTkI+zjaxQNpT/pvh5ssMqyuHp3IL5neowXTycJExpFnuThJS1YqFvquVN0gIJh5WIyB4cf3bj6Wzno3E65d0eySrJu7IJNqcVH0kBO5vHcPN2us4ugriDEUdUPCF4EgXiGeSsPwfl0o/BLyFtPisrWZA=='),
+('i2q2g2jtrtp8pqepirapmtiii7', 1400679039, 'ner9P9YnvD6mSopbQndc8zoteN2RHhKemVGaSCNqLh71+vCe4PPwtlmJ3In34kK6j1L2IH1Yr/ysD+4w0M7My9BXLhXCYgBiy+pdggXzVicIm6mEG8ZU/b6hjDYjK0gkEEWFhuUTd1HvgH63ZSDo/35lwO2N3G0B0TzKhLrN4Vb472ol6nyngs4f27ZiaPMyO1ZGW3J8HODWdmCib8iWjSBX9UkPNj381N/JcmdGCtYleKksr+PRRQpF6+kVhyI5jDRO0krM8zHZXdl9Lk8XwnC+9gd3PzeGG455Ad7BBOuMmjdZPIFUr3wJ5lsFlj7b6IDI1VIxeXv7RDQft+ptooyT6oPhYZsVDcTuSFUv8JpFmE1h7ic5qG15hvBVsMOkn66n0dN6z4shxbH4WamigCbQz08LVCcuJQYn0jq2jcKlE7uSMsKbr8TlIyY+0UMB3+rHoMgCNC5zQ5QHEsZu+H+FRYaRYdoyuKBIstVWIvu/tm8/v3Q3PuwjMKE6i/5KCP+RbVTMtA6HDEuNdc1fwA1LBr12Xy000iLoRu/PCBSLhtgGpbDck3nTv/wNoD0jtzzUdvFvcaCmveP1S0YifDZ9UI6OgU9aGZNZjtvbLGBsEahvHIrl5jFhlzTdpfV/qFybf9wSUezGtescSNsUM/MIfQ+QN/jPr6/Ge2AdPGfVClSxPmWmuEMqV5MJVPC9I1bHuw4Rqoc1+nkHn7D/oKGD6XNbRqtL/DQElQaVOmy/z3kiBRYgXUTO6h5VOcUNLbq1EXlAwxWi0R3SF18hPHkx2lIVlfabtIvMTM7OplCTOdq5wwxkJSHchSRzRzciJ0tpddnK3dABVaon7dX6BHT3dUvi2QefeqvqYDFz8IIq7MAUefB5JDY3gAC9rXcNQi86byiraNMc8QEM3RwSSObzeqBByxYZZsK80W2EH9v/j7VEoIY9D+GKKjaN4wnBJ84IZijs8eNnYUcKfPKE4rZMeakIzbPogxWvjyITfMB/xXDBt070PKISComEMR1NGgk8Sh8RROIivK7N9PswmXljvZbG2URHp7E60Rz1JWHaxFPeXuTb495DVNdf09YjKqWNUQzVjwgLTWLRJ53h0aBFvFyFM/f36kJ/DllMVUBK03jHAJyhIzzSGHi7jrKxFnu8Wl41YolPAXruXpEWunmPKHtjBRRiFlBK1JuFoy1XrohGnqISAblvbpImib41NbYtoFEOlFOYYx/FnHFUumL/5HKS9CSnfE8jDijeWJ42J3fxI04H1tIQ6enTiNfdTzN5dEYO1wEIdhaHhzbI45TOUcc/Rt4iPlC2RKSq3suTGY51MwRGC0Wb6PkgpHE9dcEtMYJJl8hpaWhXdBaDrF8WF3PS04p05gmKHbR+');
 
 -- --------------------------------------------------------
 
@@ -1441,14 +1375,14 @@ INSERT INTO `settings` (`id`, `key`, `value`) VALUES
 (3, 'site_banner_id', NULL),
 (4, 'site_email', 'admin@gg.tw'),
 (5, 'site_key', NULL),
-(6, 'site_language', 'en_US'),
+(6, 'site_language', 'zh_TW'),
 (7, 'site_style', 'nuclear'),
-(8, 'site_timezone', NULL),
+(8, 'site_timezone', 'Asia/Taipei'),
 (9, 'site_contact_page', '1'),
 (10, 'site_help_page', '1'),
-(11, 'site_message', NULL),
-(12, 'site_copyright_statement', NULL),
-(13, 'site_submit_report_message', NULL),
+(11, 'site_message', ''),
+(12, 'site_copyright_statement', ''),
+(13, 'site_submit_report_message', ''),
 (14, 'allow_reports', '1'),
 (15, 'allow_comments', '1'),
 (16, 'allow_feed', '1'),
@@ -1475,13 +1409,13 @@ INSERT INTO `settings` (`id`, `key`, `value`) VALUES
 (37, 'sms_no1', NULL),
 (38, 'sms_no2', NULL),
 (39, 'sms_no3', NULL),
-(40, 'google_analytics', NULL),
+(40, 'google_analytics', ''),
 (41, 'twitter_hashtags', NULL),
 (42, 'blocks', 'news_block|reports_block'),
 (43, 'blocks_per_row', '2'),
-(44, 'date_modify', '2014-05-17 15:20:03'),
-(45, 'stat_id', NULL),
-(46, 'stat_key', NULL),
+(44, 'date_modify', '2014-05-19 06:58:06'),
+(45, 'stat_id', '64520'),
+(46, 'stat_key', 'b32d1204b2c94499a786dbeb220ba3'),
 (47, 'email_username', NULL),
 (48, 'email_password', NULL),
 (49, 'email_port', NULL),
@@ -1490,7 +1424,7 @@ INSERT INTO `settings` (`id`, `key`, `value`) VALUES
 (52, 'email_ssl', NULL),
 (53, 'ftp_server', NULL),
 (54, 'ftp_user_name', NULL),
-(55, 'alerts_email', NULL),
+(55, 'alerts_email', 'admin@gg.tw'),
 (57, 'facebook_appid', NULL),
 (58, 'facebook_appsecret', NULL),
 (59, 'db_version', '117'),
@@ -1522,7 +1456,17 @@ CREATE TABLE IF NOT EXISTS `user_tokens` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_token` (`token`),
   KEY `fk_user_id` (`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Stores browser tokens assigned to users' AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores browser tokens assigned to users' AUTO_INCREMENT=5 ;
+
+--
+-- 轉存資料表中的資料 `user_tokens`
+--
+
+INSERT INTO `user_tokens` (`id`, `user_id`, `user_agent`, `token`, `created`, `expires`) VALUES
+(1, 2, '850b723b0d6f223a19569cf18a0435fddb569589', 'fCa1xdaXbjJGaK4PY55xreFritBvuO9I', 1400485445, 1401695045),
+(2, 1, '850b723b0d6f223a19569cf18a0435fddb569589', 'dfZnyceFbcTDJR3IXKnzzEgHjkwpWMWO', 1400627982, 1401837582),
+(3, 2, '850b723b0d6f223a19569cf18a0435fddb569589', 'vgU6TDs8uhLbi0dR8TzJIpZjFUbhGRC2', 1400631623, 1401841223),
+(4, 1, 'fce583acb6d03486c47e211f5aab993b09f191cb', 'pjQ61yMv6FgzW4bPzEw7tqVEKsjrf98f', 1400631666, 1401841266);
 
 -- --------------------------------------------------------
 
@@ -1550,14 +1494,15 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_username` (`username`),
   UNIQUE KEY `uniq_email` (`email`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores registered usersâ€™ information' AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores registered usersâ€™ information' AUTO_INCREMENT=3 ;
 
 --
 -- 轉存資料表中的資料 `users`
 --
 
 INSERT INTO `users` (`id`, `riverid`, `name`, `email`, `username`, `password`, `logins`, `last_login`, `notify`, `updated`, `color`, `code`, `confirmed`, `public_profile`, `approved`, `needinfo`) VALUES
-(1, '', 'Administrator', 'admin@gg.tw', 'admin', '95bf499afd4867a272485ee3992339812ea23a87864a0f0af1', 4, 1400339906, 0, '2014-05-17 15:18:26', 'FF0000', NULL, 1, 0, 1, 0);
+(1, '', 'Administrator', 'admin@gg.tw', 'admin', '95bf499afd4867a272485ee3992339812ea23a87864a0f0af1', 11, 1400675838, 0, '2014-05-21 12:37:18', 'FF0000', NULL, 1, 0, 1, 0),
+(2, '', 'member0', 'member0@gg.tw', '320830120', '1c40a27ee514bbd46c832ac630fa90a34244cc2cfeab5df312', 9, 1400632026, 0, '2014-05-21 00:27:06', 'FF0000', NULL, 0, 1, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -1573,7 +1518,19 @@ CREATE TABLE IF NOT EXISTS `verified` (
   `verified_status` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `incident_id` (`incident_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Stores all verified reports' AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COMMENT='Stores all verified reports' AUTO_INCREMENT=7 ;
+
+--
+-- 轉存資料表中的資料 `verified`
+--
+
+INSERT INTO `verified` (`id`, `incident_id`, `user_id`, `verified_date`, `verified_status`) VALUES
+(1, 4, 1, '2014-05-18 14:44:50', 1),
+(2, 3, 1, '2014-05-18 14:44:50', 1),
+(3, 2, 1, '2014-05-18 14:44:50', 1),
+(4, 1, 1, '2014-05-18 14:44:50', 1),
+(5, 6, 1, '2014-05-19 15:48:23', 1),
+(6, 6, 1, '2014-05-19 15:48:31', 1);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

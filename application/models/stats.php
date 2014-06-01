@@ -95,15 +95,6 @@ class Stats_Model extends ORM {
 				// In case the xml was malformed for whatever reason, we will just guess what the tag should be here
 				$tag = <<< STATSCOLLECTOR
 					<!-- Stats Collector -->
-					<script type="text/javascript">
-					setTimeout(function() {
-						var statsCollector = document.createElement('img');
-						    statsCollector.src = document.location.protocol + "//tracker.ushahidi.com/piwik/piwik.php?idsite={$stat_id}&rec=1";
-						    statsCollector.style.cssText = "width: 1px; height: 1px; opacity: 0.1;";
-
-						document.body.appendChild(statsCollector);
-					}, 100);
-					</script>
 					<!-- End Stats Collector -->
 STATSCOLLECTOR;
 			}

@@ -28,8 +28,29 @@ class reports_Core {
 	 * @var Pagination
 	 */
 	public static $pagination = array();
-	
-			
+
+	private function __construct(){}
+	protected static $dbinst = null;
+	public static function getDBInstance()
+	{
+		if (self::$dbinst === null) {
+			self::$dbinst = new Database();
+		}
+		return self::$dbinst;
+	}
+
+	public static function getCategoryParentMap() {
+		$db = reports::getDBInstance();
+		$sql = "SELECT id FROM category WHERE parent_id = 0 ORDER BY category_position ASC";
+		$i = 1;
+		foreach ( $db->query ( $sql ) as $category ) {
+			$id = $category->id;
+			$parentmap [$id] = $i . "";
+			$i += 1;
+		}
+		return $parentmap;
+	}
+
 	/**
 	 * Validation of form fields
 	 *
@@ -72,16 +93,30 @@ class reports_Core {
 		else
 		{
 			$category_error = FALSE;
+			$new_incident_category = array();
+			$db = self::getDBInstance();
+			$parentmap = self::getCategoryParentMap();
 			for ($canum = 1; $canum <= Kohana::config('settings.nu_category_parent_num'); $canum += 1) {
-				if ( ! isset($post->incident_category[''.$canum])) {
+				$cid = $post->incident_category[''.$canum];
+				if ( !isset($cid) || !is_numeric($cid) ) {
 					error_log($canum . " not found!");
 					$category_error = TRUE;
 					break;
+				} else {
+					$sql = 'SELECT parent_id FROM category WHERE id =' . $cid;
+					$pcid = $db->query( $sql )[0]->parent_id;
+					if ($pcid != $canum) {
+						error_log("pcid and canum not equal!");
+						$category_error = TRUE;
+						break;
+					}
+					$new_incident_category[''.$canum] = $cid;
 				}
 			}
 			if ($category_error) {
 				$post->add_error('incident_category','required');
 			} else {
+				$post->incident_category = $new_incident_category;
 				$post->add_rules('incident_category.*','required','numeric');
 			}
 		}
@@ -368,7 +403,7 @@ class reports_Core {
 		if (isset($post->geometry)) 
 		{
 			// Database object
-			$db = new Database();
+			$db = self::getDBInstance();
 			
 			// SQL for creating the incident geometry
 			$sql = "INSERT INTO ".Kohana::config('database.default.table_prefix')."geometry "
@@ -1002,7 +1037,7 @@ class reports_Core {
 			{
 				// Get the valid IDs - faster in a separate query as opposed
 				// to a subquery within the main query
-				$db = new Database();
+				$db = self::getDBInstance();
 
 				$rows = $db->query('SELECT DISTINCT incident_id FROM '
 				    .$table_prefix.'form_response WHERE '.$where_text);

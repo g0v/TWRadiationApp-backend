@@ -79,15 +79,8 @@ class Report_Api_Object extends Api_Object_Core {
             $post['incident_category'] = explode(',', $post['incident_category']);
 
 			// to change incident_category format for nuclear map
-			$db = new Database ();
-			$sql = "SELECT id FROM category WHERE parent_id = 0 ORDER BY category_position ASC";
-			$i = 1;
-			foreach ( $db->query ( $sql ) as $category ) {
-				// error_log(json_encode($category));
-				$id = $category->id;
-				$parentmap [$id] = $i . "";
-				$i += 1;
-			}
+			$db = reports::getDBInstance();
+			$parentmap = reports::getCategoryParentMap();
 			$newcategory = array ();
 			foreach ( $post ['incident_category'] as $cid ) {
 				if (is_numeric ( $cid )) {

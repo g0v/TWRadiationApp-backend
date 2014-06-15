@@ -834,12 +834,39 @@ class reports_Core {
 			// Check if there are any category ids
 			if (count($category_ids) > 0)
 			{
-				$category_ids = implode(",", $category_ids);
-			
-				array_push(self::$params,
-					'(c.id IN ('.$category_ids.') OR c.parent_id IN ('.$category_ids.'))',
+				if (count($category_ids) == 1) {
+					$category_ids = implode(",", $category_ids);
+					array_push(self::$params,
+						'(c.id IN ('.$category_ids.') OR c.parent_id IN ('.$category_ids.'))',
+						'c.category_visible = 1'
+					);
+				} else {
+					$parentmap = self::getCategoryParentMap();
+					$fs = true;
+					$tmp = "";
+					for ($i = 0; $i < count($category_ids); $i += 1) {
+						if (array_key_exists($category_ids[$i], $parentmap)) {
+							if ($fs) {
+								$fs = false;
+								$tmp = "EXISTS (SELECT ic0.id from incident_category ic0 JOIN category c0 ON ic0.category_id = c0.id where ic.incident_id = ic0.incident_id and c0.parent_id=".$category_ids[$i].") ";
+							} else {
+								$tmp = $tmp . "AND EXISTS (SELECT ic0.id from incident_category ic0 JOIN category c0 ON ic0.category_id = c0.id where ic.incident_id = ic0.incident_id and c0.parent_id=".$category_ids[$i].") ";
+							}
+						} else {
+							if ($fs) {
+								$fs = false;
+								$tmp = "EXISTS (SELECT id from incident_category where ic.incident_id = incident_id and category_id=".$category_ids[$i].") ";
+							} else {
+								$tmp = $tmp . "AND EXISTS (SELECT id from incident_category where ic.incident_id = incident_id and category_id=".$category_ids[$i].") ";
+							}
+						}
+					}
+// 					error_log("$tmp");
+					array_push(self::$params,
+					$tmp,
 					'c.category_visible = 1'
-				);
+					);
+				}
 			}
 		}
 		

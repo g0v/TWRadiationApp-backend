@@ -308,6 +308,7 @@ class Incident_Model extends ORM {
 			{
 				$sql .= 'AND '.$predicate.' ';
 			}
+			// error_log("sql = " . $sql);
 		}
 
 		// Might need "GROUP BY i.id" do avoid dupes

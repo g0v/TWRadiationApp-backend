@@ -93,18 +93,39 @@ class Json_Controller extends Template_Controller {
 		}
 		
 		// Category ID
-		$category_id = (isset($_GET['c']) AND intval($_GET['c']) > 0) ? intval($_GET['c']) : 0;
+		// Due to intval() will only get first value of array, We need to change the way of parser
+		if (isset($_GET['c'])) {
+			// stripe(',')
+			$tmp = preg_replace('/^,*/', '', preg_replace('/\,*$/', '', $_GET['c']));
+			// find(',')
+			$fi = strpos(preg_replace('/^,*/', '', preg_replace('/\,*$/', '', $tmp)), ',');
+			if ($fi !== false) {
+				$category_id = explode(",", $tmp);
+			} else {
+				$category_id = (intval($_GET['c']) > 0) ? intval($_GET['c']) : 0;
+			}
+		} else {
+			$category_id = 0;
+		}
+
 		// Get the category colour
+		// Assign default color if category_id is array
 		if (Category_Model::is_valid_category($category_id))
 		{
 			// Get the color & icon
-			$cat = ORM::factory('category', $category_id);
-			$color = $cat->category_color;
-			$icon = "";
-			if ($cat->category_image)
-			{
-				$icon = url::convert_uploaded_to_abs($cat->category_image);
+			if (!is_array($category_id)) {
+				$cat = ORM::factory('category', $category_id);
+				$color = $cat->category_color;
+				$icon = "";
+				if ($cat->category_image)
+				{
+					$icon = url::convert_uploaded_to_abs($cat->category_image);
+				}
 			}
+		}
+		if (is_array($category_id)) {
+			$color = "666666";
+			$icon = "";
 		}
 		
 		$params = array('color' => $color, 'icon' => $icon);
@@ -260,7 +281,7 @@ class Json_Controller extends Template_Controller {
 				'id' => $marker->id,
 				'name' => $item_name,
 				'link' => $link,
-				'category' => array($category_id),
+// 				'category' => array($category_id),
 				'color' => $color,
 				'labelcolor' => $labelcolor,
 				'icon' => $icon,
@@ -457,7 +478,7 @@ class Json_Controller extends Template_Controller {
 			$json_item['properties'] = array(
 				'name' => $item_name,
 				'link' => $link,
-				'category' => array($category_id),
+// 				'category' => array($category_id),
 				'color' => $color,
 				'labelcolor' => $labelcolor,
 				'measured_value' => $bounds['color'],

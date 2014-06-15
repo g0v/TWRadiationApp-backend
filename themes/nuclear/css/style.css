@@ -1981,7 +1981,7 @@ a.btn-show { display:none; }
 .f-media-box {}
     
 /* Filter List */
-ul.filter-list { list-style-type:none; position:relative; }
+ul.filter-list { list-style-type:none; position:relative; font-size: 16px;}
 ul.filter-list ul { list-style-type:none; padding:0 0 0 20px; }
 ul.filter-list li { display:block; position:relative; }
 ul.filter-list li a { display:block; position:relative; overflow:auto; padding:3px 0 3px 20px; margin-bottom:3px; }

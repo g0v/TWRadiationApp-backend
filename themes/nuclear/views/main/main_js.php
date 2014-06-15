@@ -15,7 +15,7 @@
  * @license    http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL) 
  */
 ?>
-		
+</script><script type='text/javascript'>
 // Initialize the Ushahidi namespace
 Ushahidi.baseURL = "<?php echo url::site(); ?>";
 Ushahidi.markerRadius = <?php echo $marker_radius; ?>;
@@ -249,6 +249,27 @@ jQuery(function() {
 		e: endTime
 	}); }, 800);
 
+	var cat_selected = [];
+	$.each($('.filter-list li input:radio'), function(){
+		if ($(this).is(":checked")) {
+			cat_selected.push($(this).parent().parent().attr("id").split("_").pop());
+		}
+	});
+	$(".filter-list li a").click(function() {
+		$(this).find("input:radio").attr('checked', true);
+		var cat_selected_new = [];
+		$.each($('.filter-list li input:radio'), function(){
+			if ($(this).is(":checked")) {
+				cat_selected_new.push($(this).parent().parent().attr("id").split("_").pop());
+			}
+		});
+		if (cat_selected.toString() != cat_selected_new.toString()) {
+			cat_selected = cat_selected_new;
+			map.updateReportFilters({c: cat_selected});
+		}
+	}).hover(function(){
+		$(this).css('cursor','pointer');
+	});
 
 	// Category Switch Action
 	$("ul#category_switch li > a").click(function(e) {

@@ -20,15 +20,32 @@
 			<div class="cat-filters clearingfix">
 				<strong>
 					<?php echo Kohana::lang('ui_main.category_filter');?>
-					<span>
+					<!-- <span>
 						[<a href="javascript:toggleLayer('category_switch_link', 'category_switch')" id="category_switch_link">
 							<?php echo Kohana::lang('ui_main.hide'); ?>
 						</a>]
-					</span>
+					</span> -->
 				</strong>
 			</div>
 
-			<ul id="category_switch" class="category-filters">
+			<ul class="filter-list fl-categories" id="category-filter-list">
+				<!-- <li>
+					<a href="#"><?php
+					$all_cat_image = '&nbsp';
+					$all_cat_image = '';
+					if($default_map_all_icon != NULL) {
+						$all_cat_image = html::image(array('src'=>$default_map_all_icon));
+					}
+					?>
+					<span class="item-swatch" style="background-color: #<?php echo Kohana::config('settings.default_map_all'); ?>"><?php echo $all_cat_image ?></span>
+					<span class="item-title"><?php echo Kohana::lang('ui_main.all_categories'); ?></span>
+					<span class="item-count" id="all_report_count"><?php //echo $report_stats->total_reports; ?></span>
+					</a>
+				</li> -->
+				<?php echo category::get_nuclear_category_tree_view(); ?>
+			</ul>
+
+			<!-- <ul id="category_switch" class="category-filters">
 				<?php
 				$color_css = 'class="category-icon swatch" style="background-color:#'.$default_map_all.'"';
 				$all_cat_image = '';

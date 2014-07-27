@@ -13,6 +13,7 @@ echo html::script(url::file_loc('js').'media/js/openid/openid-jquery', TRUE);
 echo html::script(url::file_loc('js').'media/js/openid/openid-jquery-en', TRUE);
 echo html::script(url::file_loc('js').'media/js/global', TRUE);
 ?>
+<script type="text/javascript" src="http://connect.facebook.net/zh_TW/sdk.js"></script>
 <script type="text/javascript">
 	<?php echo $js; ?>
 </script>
@@ -141,27 +142,10 @@ echo html::script(url::file_loc('js').'media/js/global', TRUE);
 			<?php echo form::close() ?>
 		</div>
 
-		<?php if (kohana::config('config.allow_openid') == TRUE): ?>
 		<h2><a href="javascript:toggle('signin_openid');"><?php echo Kohana::lang('ui_main.login_openid'); ?></a></h2>
 		<div id="signin_openid" class="signin_select ui-corner-all">
-			<?php echo form::open(NULL, array('id'=>"openid_form")); ?>
-				<input type="hidden" name="action" value="openid">
-				<div id="openid_choice">
-					<p><?php echo Kohana::lang('ui_main.login_select_openid'); ?>:</p>
-					<div id="openid_btns"></div>
-				</div>
-
-				<div id="openid_input_area">
-					<input id="openid_identifier" name="openid_identifier" type="text" value="http://" />
-					<input id="openid_submit" type="submit" value="Sign-In"/>
-				</div>
-				<noscript>
-					<p>OpenID is service that allows you to log-on to many different websites using a single indentity.
-					Find out <a href="http://openid.net/what/">more about OpenID</a> and <a href="http://openid.net/get/">how to get an OpenID enabled account</a>.</p>
-				</noscript>
-			<?php echo form::close(); ?>
+			<fb:login-button auto_logout_link="true" data-size="xlarge" scope="public_profile,email" onlogin="n_fb_statusChangeCallback();"></fb:login-button>
 		</div>
-		<?php endif; ?>
 	</div>
 
 	<div id="create_account" class="ui-corner-all">

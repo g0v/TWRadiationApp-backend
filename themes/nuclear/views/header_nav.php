@@ -18,7 +18,7 @@
 				<img alt="<?php echo html::escape($loggedin_user->username); ?>" src="<?php echo html::escape(members::gravatar($loggedin_user->email, 20)); ?>" width="20" />
 			</a>
 
-			<ul class="header_nav_dropdown" style="display:none;">
+			<ul class="header_nav_dropdown" style="display:none;" data-loginstat="true">
 			<?php if($loggedin_role != ""){ ?>
 				<li><a href="<?php echo url::site().$loggedin_role;?>/profile"><?php echo Kohana::lang('ui_main.manage_your_account'); ?></a></li>
 
@@ -26,15 +26,18 @@
 			<?php } ?>
 				<li><a href="<?php echo url::site();?>profile/user/<?php echo $loggedin_user->username; ?>"><?php echo Kohana::lang('ui_main.view_public_profile'); ?></a></li>
 
-				<li><a href="<?php echo url::site();?>logout"><em><?php echo Kohana::lang('ui_admin.logout');?></em></a></li>
-
+				<!--<li><a href="<?php echo url::site();?>logout"><em><?php echo Kohana::lang('ui_admin.logout');?></em></a></li>-->
+				<li><a id="logout"><em><?php echo Kohana::lang('ui_admin.logout');?></em></a></li>
+				<li>
+					<fb:login-button auto_logout_link="true" class="n_fb_login" scope="public_profile,email" onlogin="n_fb_statusChangeCallback();"></fb:login-button>
+				</li>
 			</ul>
 
 		<?php } else { ?>
 
 			<a href="<?php echo url::site('login');?>" style="float:right;padding-top:8px;"><span class="header_nav_label"><strong><?php echo Kohana::lang('ui_main.login'); ?></strong></span></a>
 			
-			<div class="header_nav_dropdown" style="display:none;">
+			<div class="header_nav_dropdown" style="display:none;" data-loginstat="false">
 			
 				<?php echo form::open('login/', array('id' => 'userpass_form')); ?>
 				<input type="hidden" name="action" value="signin" />
@@ -45,9 +48,12 @@
 					<li><label for="password"><?php echo Kohana::lang('ui_main.password');?></label><input name="password" type="password" class="" id="password" size="20" /></li>
 	
 					<li><input type="submit" name="submit" value="<?php echo Kohana::lang('ui_main.login'); ?>" class="header_nav_login_btn" /></li>
+					<li>
+						<fb:login-button auto_logout_link="true" class="n_fb_login" scope="public_profile,email" onlogin="n_fb_statusChangeCallback();"></fb:login-button>
+					</li>
 				</ul>
-				<?php echo form::close(); ?>
 				
+				<?php echo form::close(); ?>
 				<ul>
 	
 					<li><a href="<?php echo url::site()."login/?newaccount";?>"><?php echo Kohana::lang('ui_main.login_signup_click'); ?></a></li>
@@ -69,3 +75,7 @@
 		</li>
 	</ul>
 </div>
+<div id="fb-root"></div>
+<script type="text/javascript">
+var LNM_FBappId = "<?php echo Settings_Model::get_setting('facebook_appid'); ?>";
+</script>

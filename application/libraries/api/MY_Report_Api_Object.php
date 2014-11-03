@@ -78,6 +78,27 @@ class Report_Api_Object extends Api_Object_Core {
             $post = array_merge($_POST, $_FILES);
             $post['incident_category'] = explode(',', $post['incident_category']);
 
+			// to change incident_category format for nuclear map
+			$db = reports::getDBInstance();
+			$parentmap = reports::getCategoryParentMap();
+			$newcategory = array ();
+			foreach ( $post ['incident_category'] as $cid ) {
+				if (is_numeric ( $cid )) {
+					$sql = "SELECT parent_id FROM category WHERE id = " . $cid . " ORDER BY category_position ASC";
+					// error_log('is_num, parent_id=' . json_encode($db->query($sql)[0]));
+					$pcid = $db->query ( $sql )[0]->parent_id;
+					if (is_numeric ( $pcid )) {
+						$newcategory [$parentmap [$pcid]] = $cid;
+					} else {
+						error_log ( 'pcid NOO is_num' );
+					}
+				} else {
+					error_log ( 'NOOO  is_num' );
+				}
+			}
+			// error_log('$newcategory' . json_encode($newcategory));
+			$post ['incident_category'] = $newcategory;
+
             // 
             // EK <emmanuel@ushahidi.com> - 17/05/2012
             // Commenting out this event ('ushahidi_action.report_submit_api') because
@@ -127,9 +148,9 @@ class Report_Api_Object extends Api_Object_Core {
                 // Success
                 return 0;
 
-            } 
-            else 
-            {               
+            }
+            else
+            {
                 // Populate the error fields, if any
                 $this->messages = arr::overwrite($this->messages, 
                         $post->errors('report'));

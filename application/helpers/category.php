@@ -24,7 +24,7 @@ class category_Core {
 		$disabled = "";
 		if (!$enable_parents AND count($category['children']) > 0)
 		{
-			$disabled = " disabled=\"disabled\"";	
+			$disabled = " disabled=\"disabled\"";
 		}
 
 		$html .= "<label>";
@@ -32,6 +32,26 @@ class category_Core {
 		$html .= $category['category_title'];
 		$html .= "</label>";
 
+		return $html;
+	}
+
+	private static function display_category_radio($category, $selected_categories, $form_field, $enable_parents = FALSE, $index)
+	{
+		$html = '';
+		$cid = $category['category_id'];
+
+		// Category is selected.
+		$category_checked = in_array($cid, $selected_categories);
+		$disabled = "";
+		if (!$enable_parents AND count($category['children']) > 0)
+		{
+			$disabled = " disabled=\"disabled\"";
+		}
+
+		$html .= "<label>";
+		$html .= form::radio($form_field.'['.$index.']', $cid, $category_checked, ' class="check-box"'.$disabled);
+		$html .= $category['category_title'];
+		$html .= "</label>";
 		return $html;
 	}
 
@@ -119,7 +139,70 @@ class category_Core {
 
 		return $html;
 	}
+
+	public static function form_radio($form_field, array $selected_categories = array(), $columns = 1, $enable_parents = FALSE, $show_hidden = FALSE)
+	{
+		$category_data = self::get_category_tree_data(FALSE, $show_hidden);
+		$html = '';
+
+		// Validate columns
+		$columns = (int) $columns;
+		if ($columns == 0)
+		{
+			$columns = 1;
+		}
+
+		$categories_total = count($category_data);
 	
+		// Format categories for column display.
+		// Column number
+		$this_col = 1;
+
+		// Maximum number of elements per column
+		$maxper_col = round($categories_total / $columns);
+
+		// start the first column
+		$html .= "\n".'<ul class="category-column category-column-'.$this_col.'" id="category-column-'.$this_col.'">'."\n";
+
+		$i = 1;  // Element Count
+		foreach ($category_data as $category)
+		{
+			if ($category['category_id'] == Kohana::config('settings.nu_add_category_parent_category')) {
+				continue;
+			}
+			// Display parent category.
+			$html .= "\n\t".'<li title="'.$category['category_description'].'">';
+			$html .= "\n\t\t".category::display_category_radio($category, $selected_categories, $form_field, $enable_parents, $i)."\n";
+
+			// Display child categories.
+			if (count($category['children']) > 0)
+			{
+				$html .= "\t\t<ul>";
+				foreach ($category['children'] as $child)
+				{
+					$html .= "\n\t\t\t".'<li title="'.$child['category_description'].'">'."\n";
+					$html .= category::display_category_radio($child, $selected_categories, $form_field, $enable_parents, $i);
+					$html .= "\n\t\t\t".'</li>'."\r\n";
+				}
+				$html .= "\t\t".'</ul>'."\r\n";
+			}
+			$html .= "\t</li>\n";
+
+			// If this is the last element of a column, close the UL
+			if ( (($i % $maxper_col) == 0 AND $i > 0) OR $i == $categories_total)
+			{
+				$html .= "</ul>\n";
+				$this_col++;
+				if($i < $categories_total)
+				{
+					$html .= '<ul class="category-column category-column-'.$this_col.'" id="category-column-'.$this_col.'">';
+				}
+			}
+			$i++;
+		}
+		return $html;
+	}
+
 	/**
 	 * Generates a category tree view - recursively iterates
 	 *
@@ -132,7 +215,48 @@ class category_Core {
 		// Generate and return the HTML
 		return self::_generate_treeview_html($category_data);
 	}
+
+	public static function get_nuclear_category_tree_view()
+	{
+		$category_data = self::get_category_tree_data(TRUE);
+		// Generate and return the HTML
+		return self::_nuclear_generate_treeview_html($category_data, 0, 0);
+	}
+
+	private static function _nuclear_generate_treeview_html($category_data, $deep, $category_group)
+	{
+		// To hold the treeview HTMl
+		$tree_html = "";
+		if ($deep == 0) {
+			$span_color = "003300";
+			$checked = "checked";
+		} else {
+			$span_color = "88AA88";
+			$checked = "";
+		}
+
+		foreach ($category_data as $id => $category)
+		{
+			// Determine the category class
+			$category_class = ($category['parent_id'] > 0)? " class=\"report-listing-category-child\"" : "";
+			$category_image = $category['category_image_thumb'] ? html::image(array('src'=> url::convert_uploaded_to_abs($category['category_image_thumb']), 'style'=>'float:left;padding-right:5px;')) : NULL;
+			$tree_html .= "<li".$category_class.">"
+					. "<a class=\"cat_selected\" id=\"filter_link_cat_".$id."\" title=\"{$category['category_description']}\">"
+					//. "<span class=\"item-swatch\" style=\"background-color: #".$span_color."\">$category_image</span>"
+					. "<span class=\"item-swatch\" style=\"padding-top: 3px;\"><input type=\"radio\" name=\"category_group[".$category_group."]\"".$checked."></span>"
+					. "<span class=\"item-title\">".html::strip_tags($category['category_title'])."</span>"
+					//. "<span class=\"item-count\">".$category['report_count']."</span>"
+					. "</a></li>";
+			$tree_html .= self::_nuclear_generate_treeview_html($category['children'], $deep + 1, $category_group);
+			if ($deep == 0) {
+				$category_group += 1;
+			}
+		}
 	
+		// Return
+		return $tree_html;
+	}
+
 	/**
 	 * Get categories as an tree array
 	 * @param bool Get category count?

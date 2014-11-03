@@ -12,7 +12,10 @@
  * @copyright  Ushahidi - http://www.ushahidi.com
  * @license	   http://www.gnu.org/copyleft/lesser.html GNU Lesser General Public License (LGPL)
  */
-
+require_once 'facebook-php-sdk-v4-4.0-dev/autoload.php';
+use Facebook\FacebookSession;
+use Facebook\FacebookRequest;
+use Facebook\GraphUser;
 class Login_Controller extends Template_Controller {
 
 	public $auto_render = TRUE;
@@ -32,6 +35,9 @@ class Login_Controller extends Template_Controller {
 
 	public function index($user_id = 0)
 	{
+// 		error_log("POST:" . json_encode($_POST));
+// 		error_log("GET" . json_encode($_GET));
+
 		// Set messages to display on the login page for the user
 		$message = FALSE;
 		$message_class = 'login_error';
@@ -47,6 +53,11 @@ class Login_Controller extends Template_Controller {
 			// Redirect users to the relevant dashboard
 			if ($auth->logged_in('login'))
 			{
+				if (isset($_POST['fb_token'])) {
+					$ret = array('ret' => 0, 'status' => 'success');
+					echo json_encode($ret);
+					exit();
+				}
 				url::redirect($auth->get_user()->dashboard());
 			}
 
@@ -127,7 +138,10 @@ class Login_Controller extends Template_Controller {
 		// check, has the form been submitted, if so, setup validation
 		if ($_POST AND isset($_POST["action"]) AND $_POST["action"] == "signin")
 		{
-
+			error_log("enter signin!");
+			if (isset($_POST['fb_token'])) {
+				$this->facebook();
+			}
 			// START: Signin Process
 
 			$post = Validation::factory($_POST);
@@ -708,13 +722,70 @@ class Login_Controller extends Template_Controller {
 	{
 		$auth = Auth::instance();
 
-		$this->template = "";
-		$this->auto_render = FALSE;
+		$app_id = Settings_Model::get_setting('facebook_appid');
+		$app_secret = Settings_Model::get_setting('facebook_appsecret');
 
-		$settings = ORM::factory("settings")->find(1);
+		FacebookSession::setDefaultApplication($app_id, $app_secret);
+		$session = new FacebookSession($_POST['fb_token']);
+		try {
+			$session->Validate($app_id ,$app_secret);
+			if ($session) {
+				$user_profile = (new FacebookRequest($session, 'GET', '/me'))->execute()->getGraphObject(GraphUser::className());
+				error_log( "Name: " . $user_profile->getName() . " ID: " . $user_profile->getId() . " mail: " . $user_profile->getProperty('email'));
 
-		$appid = $settings->facebook_appid;
-		$appsecret = $settings->facebook_appsecret;
+				// But first... does this email address already exist in the system?
+				$user = ORM::factory("user");
+				if ($user->email_exists($user_profile->getProperty('email'))) {
+					$openid_error = $user_profile->getProperty('email') . " is already registered in our system.";
+					error_log($openid_error);
+					// Redirect back to login
+					// Initiate Ushahidi side login + AutoLogin
+					$username = $user_profile->getProperty('email');
+					$password = $user_profile->getId() . '#';
+					error_log("username=" . $username . " pass=" . $password);
+//					$auth->login($username, $password, TRUE);
+					$auth->force_login($username);
+
+					// Redirect to Dashboard
+					$ret = array('ret' => 0, 'status' => 'success');
+					echo json_encode($ret);
+					error_log(json_encode($ret));
+					exit();
+				} else {
+					error_log("No email in our system, create a new one!");
+					$username = "user".time(); // Random User Name from TimeStamp - can be changed later
+					$password = $user_profile->getId() . '#';
+					error_log('pass=' . $password);
+
+					// Name Available?
+					$user->name = $user_profile->getName();
+					$user->username = $username;
+					$user->password = $password;
+					$user->email = $user_profile->getProperty('email');
+
+					// Add New Roles
+					$user->add(ORM::factory('role', 'login'));
+					$user->add(ORM::factory('role', 'member'));
+
+					$user->save();
+					$auth->force_login($username);
+					$ret = array('ret' => 0, 'status' => 'success');
+					echo json_encode($ret);
+					error_log(json_encode($ret));
+					exit();
+				}
+			} else {
+				error_log("my1 test NOOOOO  login");
+			}
+		} catch( FacebookAuthorizationException $ex) {
+			error_log("my1 test FacebookAuthorizationException " . $ex);
+// 			error_log("my1 test FacebookAuthorizationException ");
+		} catch(Exception $ex) {
+			error_log("my1 test Exception " . $ex);
+// 			error_log("my1 test Exception ");
+		}
+
+		return;
 		$next_url = url::site()."members/login/facebook";
 		$cancel_url = url::site()."members/login";
 
@@ -1014,7 +1085,7 @@ class Login_Controller extends Template_Controller {
 		}
 		catch (Exception $e)
 		{
-			Kohana::log('warning', Swift_LogContainer::getLog()->dump(true));
+			Kohana::log('alert', Swift_LogContainer::getLog()->dump(true));
 			return FALSE;
 		}
 

@@ -108,10 +108,12 @@ class Themes_Core {
 		
 		Requirements::js('media/js/global.js');
 		Requirements::css('media/css/global.css');
+		Requirements::customHeadTags('<script type="text/javascript" src="http://connect.facebook.net/en_UK/sdk.js"></script>', 'globalcode-head');
 
 		if ($this->map_enabled)
 		{
-			Requirements::js("media/js/OpenLayers.js");
+			//Requirements::js("media/js/OpenLayers.js");
+			Requirements::js("media/js/OpenLayers.debug.js");
 			Requirements::js("media/js/ushahidi.js");
 			if ($this->api_url)
 			{

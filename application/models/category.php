@@ -39,7 +39,40 @@ class Category_Model extends ORM_Tree {
 	protected $sorting = array("category_position" => "asc");
 	
 	protected static $categories;
+
+	public function __construct($id = NULL)
+	{
+		// Set the object name and plural name
+		$this->object_name   = strtolower(substr(get_class($this), 0, -6));
+		$this->object_plural = inflector::plural($this->object_name);
+
+		if (!isset($this->sorting))
+		{
+			// Default sorting
+			$this->sorting = array($this->primary_key => 'asc');
+		}
+
+		// Initialize database
+		$this->__initialize();
+
+		// Clear the object
+		$this->clear();
 	
+		if (is_object($id))
+		{
+			// Load an object
+			$this->load_values((array) $id);
+		}
+		elseif (is_array($id)) {
+			// error_log("I am array! Do nothing");
+		}
+		elseif (!empty($id))
+		{
+			// Find an object
+			$this->find($id);
+		}
+	}
+
 	/**
 	 * Validates and optionally saves a category record from an array
 	 *

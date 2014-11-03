@@ -79,7 +79,7 @@
 				strokeOpacity: "${strokeOpacity}",
 				label:"${clusterCount}",
 				fontWeight: "${fontweight}",
-				fontColor: "#ffffff",
+				fontColor: "${labelcolor}",
 				fontSize: "${fontsize}",
 				title: "${title}"    
 			},
@@ -215,6 +215,9 @@
 					color: function(feature) {
 						return "#" + feature.attributes.color;
 					},
+					labelcolor: function(feature) {
+						return "#" + feature.attributes.labelcolor;
+					},
 					strokeColor: function(feature) {
 						if ( typeof(feature.attributes.strokecolor) != 'undefined' && 
 							feature.attributes.strokecolor != '')
@@ -232,19 +235,25 @@
 						return (feature_icon !== "") ? feature_icon : "";
 					},
 					clusterCount: function(feature) {
-						if (feature.attributes.count > 1)
-						{
-							if ($.browser.msie && $.browser.version=="6.0")
-							{ // IE6 Bug with Labels
-								return "";
+						if (typeof(feature.attributes.measured_value) != 'undefined') {
+							if (feature.attributes.measured_value != 0) {
+								return feature.attributes.measured_value.toFixed(3);
 							}
-
-							return feature.attributes.count;
 						}
-						else
-						{
-							return "";
-						}
+						return "";
+//						if (feature.attributes.count > 1)
+//						{
+//							if ($.browser.msie && $.browser.version=="6.0")
+//							{ // IE6 Bug with Labels
+//								return "";
+//							}
+//
+//							return feature.attributes.count;
+//						}
+//						else
+//						{
+//							return "";
+//						}
 					},
 					opacity: function(feature) {
 						feature_icon = feature.attributes.icon;

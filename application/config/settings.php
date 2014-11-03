@@ -29,5 +29,10 @@ $config = array
 	'title_delimiter' => ' | ',
 	'alert_days' => 0, // HT: No of days of alert to be sent
 	'timeline_graph' => 'line', // HT: Timeline graph type
+	'nu_category_parent_num' => 3,
+	'nu_add_category_by_role' => true,
+	'nu_add_category_trust_category' => 15,
+	'nu_add_category_normal_category' => 16,
+	'nu_add_category_parent_category' => 14,
 	'timeline_point_label' => false // HT: Timeline graph point label
 );

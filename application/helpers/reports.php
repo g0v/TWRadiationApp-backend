@@ -28,8 +28,29 @@ class reports_Core {
 	 * @var Pagination
 	 */
 	public static $pagination = array();
-	
-			
+
+	private function __construct(){}
+	protected static $dbinst = null;
+	public static function getDBInstance()
+	{
+		if (self::$dbinst === null) {
+			self::$dbinst = new Database();
+		}
+		return self::$dbinst;
+	}
+
+	public static function getCategoryParentMap() {
+		$db = reports::getDBInstance();
+		$sql = "SELECT id FROM category WHERE parent_id = 0 ORDER BY category_position ASC";
+		$i = 1;
+		foreach ( $db->query ( $sql ) as $category ) {
+			$id = $category->id;
+			$parentmap [$id] = $i . "";
+			$i += 1;
+		}
+		return $parentmap;
+	}
+
 	/**
 	 * Validation of form fields
 	 *
@@ -37,7 +58,6 @@ class reports_Core {
 	 */
 	public static function validate(array & $post)
 	{
-
 		// Exception handling
 		if ( ! isset($post) OR ! is_array($post))
 			return FALSE;
@@ -45,8 +65,8 @@ class reports_Core {
 		// Create validation object
 		$post = Validation::factory($post)
 				->pre_filter('trim', TRUE)
-				->add_rules('incident_title','required', 'length[3,200]')
-				->add_rules('incident_description','required')
+				->add_rules('incident_title','required', 'numeric')
+				//->add_rules('incident_description','required')
 				->add_rules('incident_date','required','date_mmddyyyy')
 				->add_rules('incident_hour','required','between[1,12]')
 				->add_rules('incident_minute','required','between[0,59]')
@@ -72,7 +92,33 @@ class reports_Core {
 		}
 		else
 		{
-			$post->add_rules('incident_category.*','required','numeric');
+			$category_error = FALSE;
+			$new_incident_category = array();
+			$db = self::getDBInstance();
+			$parentmap = self::getCategoryParentMap();
+			for ($canum = 1; $canum <= Kohana::config('settings.nu_category_parent_num'); $canum += 1) {
+				$cid = $post->incident_category[''.$canum];
+				if ( !isset($cid) || !is_numeric($cid) ) {
+					error_log($canum . " not found!");
+					$category_error = TRUE;
+					break;
+				} else {
+					$sql = 'SELECT parent_id FROM category WHERE id =' . $cid;
+					$pcid = $db->query( $sql )[0]->parent_id;
+					if ($pcid != $canum) {
+						error_log("pcid and canum not equal!");
+						$category_error = TRUE;
+						break;
+					}
+					$new_incident_category[''.$canum] = $cid;
+				}
+			}
+			if ($category_error) {
+				$post->add_error('incident_category','required');
+			} else {
+				$post->incident_category = $new_incident_category;
+				$post->add_rules('incident_category.*','required','numeric');
+			}
 		}
 
 		// Validate only the fields that are filled in
@@ -357,7 +403,7 @@ class reports_Core {
 		if (isset($post->geometry)) 
 		{
 			// Database object
-			$db = new Database();
+			$db = self::getDBInstance();
 			
 			// SQL for creating the incident geometry
 			$sql = "INSERT INTO ".Kohana::config('database.default.table_prefix')."geometry "
@@ -788,12 +834,39 @@ class reports_Core {
 			// Check if there are any category ids
 			if (count($category_ids) > 0)
 			{
-				$category_ids = implode(",", $category_ids);
-			
-				array_push(self::$params,
-					'(c.id IN ('.$category_ids.') OR c.parent_id IN ('.$category_ids.'))',
+				if (count($category_ids) == 1) {
+					$category_ids = implode(",", $category_ids);
+					array_push(self::$params,
+						'(c.id IN ('.$category_ids.') OR c.parent_id IN ('.$category_ids.'))',
+						'c.category_visible = 1'
+					);
+				} else {
+					$parentmap = self::getCategoryParentMap();
+					$fs = true;
+					$tmp = "";
+					for ($i = 0; $i < count($category_ids); $i += 1) {
+						if (array_key_exists($category_ids[$i], $parentmap)) {
+							if ($fs) {
+								$fs = false;
+								$tmp = "EXISTS (SELECT ic0.id from incident_category ic0 JOIN category c0 ON ic0.category_id = c0.id where ic.incident_id = ic0.incident_id and c0.parent_id=".$category_ids[$i].") ";
+							} else {
+								$tmp = $tmp . "AND EXISTS (SELECT ic0.id from incident_category ic0 JOIN category c0 ON ic0.category_id = c0.id where ic.incident_id = ic0.incident_id and c0.parent_id=".$category_ids[$i].") ";
+							}
+						} else {
+							if ($fs) {
+								$fs = false;
+								$tmp = "EXISTS (SELECT id from incident_category where ic.incident_id = incident_id and category_id=".$category_ids[$i].") ";
+							} else {
+								$tmp = $tmp . "AND EXISTS (SELECT id from incident_category where ic.incident_id = incident_id and category_id=".$category_ids[$i].") ";
+							}
+						}
+					}
+// 					error_log("$tmp");
+					array_push(self::$params,
+					$tmp,
 					'c.category_visible = 1'
-				);
+					);
+				}
 			}
 		}
 		
@@ -991,7 +1064,7 @@ class reports_Core {
 			{
 				// Get the valid IDs - faster in a separate query as opposed
 				// to a subquery within the main query
-				$db = new Database();
+				$db = self::getDBInstance();
 
 				$rows = $db->query('SELECT DISTINCT incident_id FROM '
 				    .$table_prefix.'form_response WHERE '.$where_text);

@@ -93,18 +93,39 @@ class Json_Controller extends Template_Controller {
 		}
 		
 		// Category ID
-		$category_id = (isset($_GET['c']) AND intval($_GET['c']) > 0) ? intval($_GET['c']) : 0;
+		// Due to intval() will only get first value of array, We need to change the way of parser
+		if (isset($_GET['c'])) {
+			// stripe(',')
+			$tmp = preg_replace('/^,*/', '', preg_replace('/\,*$/', '', $_GET['c']));
+			// find(',')
+			$fi = strpos(preg_replace('/^,*/', '', preg_replace('/\,*$/', '', $tmp)), ',');
+			if ($fi !== false) {
+				$category_id = explode(",", $tmp);
+			} else {
+				$category_id = (intval($_GET['c']) > 0) ? intval($_GET['c']) : 0;
+			}
+		} else {
+			$category_id = 0;
+		}
+
 		// Get the category colour
+		// Assign default color if category_id is array
 		if (Category_Model::is_valid_category($category_id))
 		{
 			// Get the color & icon
-			$cat = ORM::factory('category', $category_id);
-			$color = $cat->category_color;
-			$icon = "";
-			if ($cat->category_image)
-			{
-				$icon = url::convert_uploaded_to_abs($cat->category_image);
+			if (!is_array($category_id)) {
+				$cat = ORM::factory('category', $category_id);
+				$color = $cat->category_color;
+				$icon = "";
+				if ($cat->category_image)
+				{
+					$icon = url::convert_uploaded_to_abs($cat->category_image);
+				}
 			}
+		}
+		if (is_array($category_id)) {
+			$color = "666666";
+			$icon = "";
 		}
 		
 		$params = array('color' => $color, 'icon' => $icon);
@@ -131,7 +152,7 @@ class Json_Controller extends Template_Controller {
 		Event::run('ushahidi_filter.json_alter_markers', $markers);
 		
 		// Get geojson features array
-		$function = "{$type}_geojson";
+		$function = "{$type}_geojson"; // clusters_geojson
 		$json_features = $this->$function($markers, $category_id, $color, $icon);
 		
 		$this->render_geojson($json_features);
@@ -155,6 +176,30 @@ class Json_Controller extends Template_Controller {
 		
 		header('Content-type: application/json; charset=utf-8');
 		echo $json;
+	}
+
+	function nuclear_change_color($value, &$color, &$labelcolor, &$colorlevel){
+		if ($value < 0.11) {
+			$color = '25FF06';
+			$labelcolor = 'DA00F9';
+			$colorlevel = "1";
+		} elseif ($value < 0.19) {
+			$color = 'FCFF0A';
+			$labelcolor = '0300F5';
+			$colorlevel = "2";
+		} elseif ($value < 0.49) {
+			$color = 'FC6E08';
+			$labelcolor = '0391F7';
+			$colorlevel = "3";
+		} elseif ($value < 0.99) {
+			$color = 'F40009';
+			$labelcolor = '0BFFF6';
+			$colorlevel = "4";
+		} else {
+			$color = '450074';
+			$labelcolor = 'BAFF8B';
+			$colorlevel = "5";
+		}
 	}
 
 	/**
@@ -227,19 +272,24 @@ class Json_Controller extends Template_Controller {
 			}
 			$item_name = $this->get_title($marker->incident_title, $link);
 
+			$labelcolor = "FFFFFF";
+			$colorlevel = "0";
+			$this->nuclear_change_color((float)$marker->incident_title, $color, $labelcolor, $colorlevel);
 			$json_item = array();
 			$json_item['type'] = 'Feature';
 			$json_item['properties'] = array(
 				'id' => $marker->id,
 				'name' => $item_name,
 				'link' => $link,
-				'category' => array($category_id),
+// 				'category' => array($category_id),
 				'color' => $color,
+				'labelcolor' => $labelcolor,
 				'icon' => $icon,
 				'thumb' => $thumb,
 				'timestamp' => strtotime($marker->incident_date),
 				'count' => 1,
 				'class' => get_class($marker),
+				'measured_value' => (float)$marker->incident_title,
 				'title'  => $marker->incident_title
 			);
 			$json_item['geometry'] = array(
@@ -288,6 +338,7 @@ class Json_Controller extends Template_Controller {
 	{
 		$json_features = array();
 		
+// 		error_log(json_encode($_GET) . " color=" . $color);
 		// Extra params for clustering
 		// Start date
 		$start_date = (isset($_GET['s']) AND intval($_GET['s']) > 0) ? intval($_GET['s']) : NULL;
@@ -395,6 +446,10 @@ class Json_Controller extends Template_Controller {
 			$cluster_center = array_values($bounds['center']);
 			$southwest = $bounds['sw']['longitude'].','.$bounds['sw']['latitude'];
 			$northeast = $bounds['ne']['longitude'].','.$bounds['ne']['latitude'];
+			$colorlevel = "0";
+			$labelcolor = "FFFFFF";
+			$this->nuclear_change_color($bounds['color'], $color, $labelcolor, $colorlevel);
+
 
 			// Number of Items in Cluster
 			$cluster_count = count($cluster);
@@ -423,8 +478,10 @@ class Json_Controller extends Template_Controller {
 			$json_item['properties'] = array(
 				'name' => $item_name,
 				'link' => $link,
-				'category' => array($category_id),
+// 				'category' => array($category_id),
 				'color' => $color,
+				'labelcolor' => $labelcolor,
+				'measured_value' => $bounds['color'],
 				'icon' => $icon,
 				'thumb' => '',
 				'timestamp' => 0,
@@ -813,8 +870,16 @@ class Json_Controller extends Template_Controller {
 		$east = -180;
 
 		$lat_sum = $lon_sum = 0;
+		$color_sum = 0;
+		$color_count = 0;
 		foreach ($cluster as $marker)
 		{
+			if ( is_float((float)$marker->incident_title) ) {
+				if ( (float)$marker->incident_title < 1 ) {
+					$color_sum += $marker->incident_title;
+					$color_count += 1;
+				}
+			}
 			// Normalising data
 			if (is_array($marker))
 			{
@@ -848,6 +913,10 @@ class Json_Controller extends Template_Controller {
 			$lat_sum += $latitude;
 			$lon_sum += $longitude;
 		}
+		if ($color_count > 0) {
+// 			error_log("sum=$color_sum, count=$color_count");
+			$color_sum /= $color_count;
+		}
 		$lat_avg = $lat_sum / count($cluster);
 		$lon_avg = $lon_sum / count($cluster);
 
@@ -857,6 +926,7 @@ class Json_Controller extends Template_Controller {
 
 		return array(
 			"center"=>$center,
+			"color"=>$color_sum,
 			"sw"=>$sw,
 			"ne"=>$ne
 		);
